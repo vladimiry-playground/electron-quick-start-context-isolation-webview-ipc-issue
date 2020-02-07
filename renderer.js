@@ -12,15 +12,33 @@ webView.addEventListener("dom-ready", () => {
   webView.send("querySelectorAllStarCount");
 });
 
-webView.addEventListener("ipc-message", (event) => {
-  const {channel, args: [arg1]} = event;
+webView.addEventListener("ipc-message", (eventFromWebView) => {
+  console.log("ipc-message event", eventFromWebView);
 
+  const errMessages = [];
+
+  if (!("channel" in eventFromWebView)) {
+    errMessages.push(`"event" doesn't have "channel" prop`);
+  }
+  if (!("args" in eventFromWebView)) {
+    errMessages.push(`"event" doesn't have "args" prop`);
+  }
+
+  if (errMessages.length) {
+    appendText(errMessages.join(" + "));
+  } else {
+    const {channel, args: [arg1]} = eventFromWebView;
+    appendText(JSON.stringify({channel, arg1}));
+  }
+});
+
+function appendText(text) {
   document.body.appendChild(
     Object.assign(
       document.createElement("div"),
       {
-        innerText: JSON.stringify({channel, arg1}),
+        innerText: text,
       },
     ),
   );
-});
+}
